@@ -36,10 +36,18 @@ builder.WebHost.UseUrls("http://127.0.0.1:0");
 builder.Services.AddExceptionHandler<HandledExceptionHandler>();
 builder.Services.AddProblemDetails();
 var app = builder.Build();
-app.UseExceptionHandler(new ExceptionHandlerOptions
+if (retain)
 {
-    SuppressDiagnosticsCallback = _ => !retain
-});
+    app.UseExceptionHandler(new ExceptionHandlerOptions
+    {
+        SuppressDiagnosticsCallback = _ => false
+    });
+}
+else
+{
+    // Leave the callback unset to exercise ASP.NET Core 10’s default behavior.
+    app.UseExceptionHandler();
+}
 app.MapGet("/boom", () => { throw new InvalidOperationException("proof"); });
 
 try
